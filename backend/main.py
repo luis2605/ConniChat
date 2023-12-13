@@ -7,11 +7,14 @@ from fastapi.responses import StreamingResponse
 
 from fastapi.middleware.cors import CORSMiddleware
 from decouple import config
-import openai 
+import openai
 
 #custom function imports
+from functions.openai_request import convert_audio_to_text
 
-
+# Get Environment Vars
+openai.organization = config("OPEN_AI_ORG")
+openai.api_key = config("OPEN_AI_KEY")
 
 #initiate app
 app = FastAPI()
@@ -35,7 +38,29 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+#check health
+@app.get("/health")
+async def check_health():
+    return {"message": "healthy"}
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+#get audio 
+@app.get("/post-audio_get/")
+async def get_audio():
+#get saved audio
+    audio_input= open("luis_voice","rb")
+
+#decode audio
+
+    message_decode = convert_audio_to_text(audio_input)
+
+
+    print(message_decode)
+
+    return "done"
+
+#post bot response
+#note : not playing in browser when using post request 
+
+# @app.post("/post-audio/")
+# async def post_audio(file:UploadFile = File(...)):
+#     print("hello")
